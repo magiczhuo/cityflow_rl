@@ -37,7 +37,7 @@ namespace CityFlow {
     }
 
     void TrafficLight::setPhase(int phaseIndex) {
-        curPhaseIndex = phaseIndex;
+        curPhaseIndex = phaseIndex % (int) phases.size(); //!!!
     }
 
     void TrafficLight::reset() {

@@ -8,6 +8,7 @@
 #include <memory>
 
 #include <ctime>
+#include "engine.h"
 namespace CityFlow {
 
     Engine::Engine(const std::string &configFile, int threadNum) : threadNum(threadNum), startBarrier(threadNum + 1),
@@ -103,6 +104,8 @@ namespace CityFlow {
         return ans;
     }
 
+
+    
     bool Engine::loadFlow(const std::string &jsonFilename) {
         rapidjson::Document root;
         if (!readJsonFromFile(jsonFilename, root)) {
@@ -567,7 +570,7 @@ namespace CityFlow {
         for (auto &flow : flows)
             flow.nextStep(interval);
         planRoute();
-        handleWaiting();
+        handleWaiting();//waiting deque
         if (laneChange) {
             initSegments();
             planLaneChange();
@@ -602,6 +605,7 @@ namespace CityFlow {
         return vehiclePool.find(priority) != vehiclePool.end();
     }
 
+    //RL
     void Engine::pushVehicle(Vehicle *const vehicle, bool pushToDrivable) {
         size_t threadIndex = rnd() % threadNum;
         vehiclePool.emplace(vehicle->getPriority(), std::make_pair(vehicle, threadIndex));
@@ -632,6 +636,7 @@ namespace CityFlow {
         }
         return ret;
     }
+    
 
     std::map<std::string, int> Engine::getLaneWaitingVehicleCount() const {
         std::map<std::string, int> ret;
@@ -718,10 +723,10 @@ namespace CityFlow {
 
     void Engine::setTrafficLightPhase(const std::string &id, int phaseIndex) {
         if (!rlTrafficLight) {
-            std::cerr << "please set rlTrafficLight to true to enable traffic light control" << std::endl;
-            return;
+              std::cerr << "please set rlTrafficLight to true to enable traffic light control" << std::endl;
+              return;
         }
-        roadnet.getIntersectionById(id)->getTrafficLight().setPhase(phaseIndex);
+         roadnet.getIntersectionById(id)->getTrafficLight().setPhase(phaseIndex);
     }
 
     void Engine::setReplayLogFile(const std::string &logFile) {
