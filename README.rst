@@ -1,43 +1,47 @@
 # Roadnet.json 文件格式说明
 
-## 1. 概述
-
-`Roadnet.json` 文件用于定义道路网络结构，特别是交叉路口（Intersection）的详细信息。它包含了交叉路口的几何定义、与交叉路口相连的道路（Roads）、道路内的车道（Lanes），以及交通信号灯在不同时间下的可用路权（RoadLinkIndices）配置。
-
-本文档旨在详细解释 `Roadnet.json` 文件中各个字段的含义和组织方式。
-
-## 2. 坐标表示约定
+## 坐标表示约定
 
 系统中的地理和方向元素采用以下坐标表示形式：
 
 * **Intersection (交叉路口)**: `intersection_x_y`
-    * `x`: 横坐标
-    * `y`: 纵坐标
+  * `x`: 横坐标
+  * `y`: 纵坐标
+
 * **Road (道路)**: `road_x_y_i`
-    * `x`: 道路起点的横坐标（通常与某个Intersection的坐标关联）
-    * `y`: 道路起点的纵坐标
-    * `i`: 表示道路的前进方向，取值为 0-3：
-        * `0`: 向右 (东)
-        * `1`: 向上 (北)
-        * `2`: 向左 (西)
-        * `3`: 向下 (南)
-        (注：方向约定可能因具体系统而异，这里假设从右开始，逆时针方向变换)
+  * `x`: 道路起点的横坐标
+  * `y`: 道路起点的纵坐标
+  * `i`: 表示道路的前进方向，取值为 0-3：
+    * `0`: 向右 (东)
+    * `1`: 向上 (北)
+    * `2`: 向左 (西)
+    * `3`: 向下 (南)
+    
+    *注：方向约定从向右开始，逆时针方向变换*
+
 * **Lane (车道)**: `lane_x_y_i_j`
-    * `x, y, i`: 与其所属的 Road 定义一致。
-    * `j`: 表示当前道路中该车道的索引（例如，从最右侧车道开始编号为0, 1, 2...）。
+  * `x, y, i`: 与其所属的 Road 定义一致
+  * `j`: 表示当前道路中该车道的索引
 
-## 3. Roadnet.json 结构详解
+## Roadnet.json 结构说明
 
-`Roadnet.json` 文件通常以一个或多个交叉路口对象象为核心。以下是一个典型交叉路口对象的结构：
+`Roadnet.json` 文件定义了以下关键元素：
+- intersection（交叉路口）
+- intersection邻接的roads（道路）
+- roads的lanes（车道）
+- lightphase在不同time下的available roadlinkindices（信号灯相位）
 
-```json
-{
-  "intersections": [
-    {
-      "id": "intersection_x_y", // 交叉路口ID，遵循坐标表示约定
-      "point": {"x": 0.0, "y": 0.
-````/ 交叉路口中心点坐标
-      "width": 15.0, // 交叉路口宽度 (示例值)
-      "roads": [
-        "road_x_y_i_1", // 连接到此交叉路口的道路ID列表
-        "road_x_y
+### ⚠️ 重要说明
+
+**Roadlinks**：
+- Roadlinks为一个列表，记录当前intersection中所有的起始road-终止road的link
+- 每一个roadlink使用字典储存
+- 每一个roadlinks列表中的roadlink字典，记录了当前road link的种类（turn left等），以及起始road-终止road的link
+- 每一个roadlink中包含了所有的lane links
+- Key为"Lanelinks"的子字典中记录的是可以变道的所有情况
+- Points为变道过程中为了可视化变道过程所设计的点
+
+**交通信号灯**：
+- 在当前的intersection sample中一共有12个roadlinks
+- key为"trafficlight"的字典中"roadlinkindices"为当前路口的各个road之间的汽车行驶方式的index
+- Key为"lightphases"的字典中为时长不同"time"下的"availableroadlink"的可行使的roadlink的index
